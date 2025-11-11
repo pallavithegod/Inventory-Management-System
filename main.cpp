@@ -1,20 +1,22 @@
-#include <algorithm>
-#include <cctype>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <limits>
-#include <sstream>
-#include <string>
-#include <vector>
+#include <algorithm>  //for swapping, sorting
+#include <cctype>   //isalpha, isdigit, isalnum, isspace
+#include <fstream>  //file handling
+#include <iomanip>  //setw, setprecision etc for spacing
+#include <iostream>  //input output
+#include <limits>    //int max, int min
+#include <sstream>   //str to object conversion
+#include <string>   //string operations
+#include <vector>   //dynamic arrays
+
+using namespace std;
 
 struct Chip {
     int productId{};
-    std::string productName;
+    string productName;
     int quantity{};
-    std::string sellerName;
+    string sellerName;
     int price{};
-    std::string brandName;
+    string brandName;
     int deadstock{};
 };
 
@@ -22,9 +24,9 @@ namespace {
 
 constexpr char kDataFile[] = "chips.csv";
 constexpr double kDefaultGstRate = 0.18;
-constexpr std::size_t kTableWidth = 110;
-constexpr std::size_t kBorderRepeat = kTableWidth / 2;
-constexpr std::size_t kTitleRepeat = 24;
+constexpr size_t kTableWidth = 110;
+constexpr size_t kBorderRepeat = kTableWidth / 2;
+constexpr size_t kTitleRepeat = 24;
 
 constexpr int kIdWidth = 12;
 constexpr int kNameWidth = 24;
@@ -34,107 +36,107 @@ constexpr int kPriceWidth = 10;
 constexpr int kBrandWidth = 18;
 constexpr int kDeadstockWidth = 10;
 
-std::string repeatPattern(const std::string& pattern, std::size_t repeatCount) {
-    std::string result;
-    result.reserve(pattern.size() * repeatCount);
-    for (std::size_t i = 0; i < repeatCount; ++i) {
+string repeatPattern(const string& pattern, size_t repeatCount) {  //formatting
+    string result;
+    result.reserve(pattern.size() * repeatCount);    //space reserved beforhand
+    for (size_t i = 0; i < repeatCount; ++i) {
         result += pattern;
     }
     return result;
 }
 
-void printSectionTitle(const std::string& title) {
+void printSectionTitle(const string& title) {
     const auto border = repeatPattern("+-", kTitleRepeat);
-    std::cout << "\n" << border << ' ' << title << ' ' << border << "\n\n";
+    cout << "\n" << border << ' ' << title << ' ' << border << "\n\n";
 }
 
 void printChipTableHeader() {
     const auto border = repeatPattern("--", kBorderRepeat);
-    std::cout << border << '\n';
-    std::cout << std::left
-              << std::setw(kIdWidth) << "Product ID"
-              << std::setw(kNameWidth) << "Product Name"
-              << std::setw(kQuantityWidth) << "Quantity"
-              << std::setw(kSellerWidth) << "Seller Name"
-              << std::setw(kPriceWidth) << "Price"
-              << std::setw(kBrandWidth) << "Brand Name"
-              << std::setw(kDeadstockWidth) << "Deadstock"
+    cout << border << '\n';
+    cout << left   //left align all columns
+              << setw(kIdWidth) << "Product ID"
+              << setw(kNameWidth) << "Product Name"
+              << setw(kQuantityWidth) << "Quantity"
+              << setw(kSellerWidth) << "Seller Name"
+              << setw(kPriceWidth) << "Price"
+              << setw(kBrandWidth) << "Brand Name"
+              << setw(kDeadstockWidth) << "Deadstock"
               << '\n';
-    std::cout << border << '\n';
+    cout << border << '\n';
 }
 
-void printChipTableRow(const Chip& chip) {
-    std::cout << std::left
-              << std::setw(kIdWidth) << chip.productId
-              << std::setw(kNameWidth) << chip.productName
-              << std::setw(kQuantityWidth) << chip.quantity
-              << std::setw(kSellerWidth) << chip.sellerName
-              << std::setw(kPriceWidth) << chip.price
-              << std::setw(kBrandWidth) << chip.brandName
-              << std::setw(kDeadstockWidth) << chip.deadstock
+void printChipTableRow(const Chip& chip) {   //definiton in structure
+    cout << left
+              << setw(kIdWidth) << chip.productId
+              << setw(kNameWidth) << chip.productName
+              << setw(kQuantityWidth) << chip.quantity
+              << setw(kSellerWidth) << chip.sellerName
+              << setw(kPriceWidth) << chip.price
+              << setw(kBrandWidth) << chip.brandName
+              << setw(kDeadstockWidth) << chip.deadstock
               << '\n';
 }
 
-void printChipTableFooter(std::size_t recordCount) {
-    std::cout << '\n'
+void printChipTableFooter(size_t recordCount) {
+    cout << '\n'
               << " TOTAL RECORDS : " << recordCount
               << ' ' << "\n\n";
 }
 
-bool promptYesNo(const std::string& prompt) {
+bool promptYesNo(const string& prompt) {
     while (true) {
-        std::cout << prompt;
-        std::string input;
-        if (!std::getline(std::cin, input)) {
-            throw std::runtime_error("Input stream closed unexpectedly.");
+        cout << prompt;
+        string input;
+        if (!getline(cin, input)) {
+            throw runtime_error("Input stream closed unexpectedly.");
         }
 
         if (input.empty()) {
-            std::cout << "Please respond with Y or N.\n";
+            cout << "Please respond with Y or N.\n";
             continue;
         }
 
-        const char response = static_cast<char>(std::tolower(input.front()));
+        const char response = static_cast<char>(tolower(input.front()));
         if (response == 'y') {
             return true;
         }
         if (response == 'n') {
             return false;
         }
-        std::cout << "Please respond with Y or N.\n";
+        cout << "Please respond with Y or N.\n";
     }
 }
 
 void contactInfo();
 
-bool parseInt(const std::string& input, int& value) {
-    std::istringstream iss(input);
+bool parseInt(const string& input, int& value) {
+    istringstream iss(input);
     iss >> value;
     return !input.empty() && iss.eof() && !iss.fail();
 }
 
-int promptInt(const std::string& prompt) {
+int promptInt(const string& prompt) {
     while (true) {
-        std::cout << prompt;
-        std::string line;
-        if (!std::getline(std::cin, line)) {
-            throw std::runtime_error("Input stream closed unexpectedly.");
+        cout << prompt;
+        string line;
+        if (!getline(cin, line)) {
+            throw runtime_error("Input stream closed unexpectedly.");
         }
 
         int value{};
         if (parseInt(line, value)) {
             return value;
         }
-        std::cout << "Invalid number. Please try again.\n";
+        cout << "Invalid number. Please try again.\n";
     }
 }
 
-int promptOptionalInt(const std::string& prompt, int currentValue) {
+int promptOptionalInt(const string& prompt, int currentValue) {
     while (true) {
-        std::cout << prompt;
-        std::string line;
-        if (!std::getline(std::cin, line)) {
-            throw std::runtime_error("Input stream closed unexpectedly.");
+        cout << prompt;
+        string line;
+        if (!getline(cin, line)) {
+            throw runtime_error("Input stream closed unexpectedly.");
         }
 
         if (line.empty()) {
@@ -145,36 +147,36 @@ int promptOptionalInt(const std::string& prompt, int currentValue) {
         if (parseInt(line, value)) {
             return value;
         }
-        std::cout << "Invalid number. Please try again.\n";
+        cout << "Invalid number. Please try again.\n";
     }
 }
 
-std::string promptString(const std::string& prompt) {
-    std::cout << prompt;
-    std::string line;
-    if (!std::getline(std::cin, line)) {
-        throw std::runtime_error("Input stream closed unexpectedly.");
+string promptString(const string& prompt) {
+    cout << prompt;
+    string line;
+    if (!getline(cin, line)) {
+        throw runtime_error("Input stream closed unexpectedly.");
     }
     return line;
 }
 
-std::string promptOptionalString(const std::string& prompt,
-                                 const std::string& currentValue) {
-    std::cout << prompt;
-    std::string line;
-    if (!std::getline(std::cin, line)) {
-        throw std::runtime_error("Input stream closed unexpectedly.");
+string promptOptionalString(const string& prompt,
+                                 const string& currentValue) {
+    cout << prompt;
+    string line;
+    if (!getline(cin, line)) {
+        throw runtime_error("Input stream closed unexpectedly.");
     }
     return line.empty() ? currentValue : line;
 }
 
-std::vector<std::string> tokenize(const std::string& line) {
-    std::vector<std::string> tokens;
-    std::string token;
-    std::istringstream iss(line);
+vector<string> tokenize(const string& line) {
+    vector<string> tokens;
+    string token;
+    istringstream iss(line);
 
-    while (std::getline(iss, token, ',')) {
-        tokens.emplace_back(std::move(token));
+    while (getline(iss, token, ',')) {
+        tokens.emplace_back(move(token));
     }
     if (!line.empty() && line.back() == ',') {
         tokens.emplace_back();
@@ -182,30 +184,30 @@ std::vector<std::string> tokenize(const std::string& line) {
     return tokens;
 }
 
-Chip chipFromTokens(const std::vector<std::string>& tokens) {
+Chip chipFromTokens(const vector<string>& tokens) {
     Chip chip;
     if (tokens.size() < 6) {
-        throw std::runtime_error("Insufficient columns to parse chip.");
+        throw runtime_error("Insufficient columns to parse chip.");
     }
 
     int value{};
 
     if (!parseInt(tokens[0], value)) {
-        throw std::runtime_error("Invalid Product_ID value.");
+        throw runtime_error("Invalid Product_ID value.");
     }
     chip.productId = value;
 
     chip.productName = tokens[1];
 
     if (!parseInt(tokens[2], value)) {
-        throw std::runtime_error("Invalid Quantity value.");
+        throw runtime_error("Invalid Quantity value.");
     }
     chip.quantity = value;
 
     chip.sellerName = tokens[3];
 
     if (!parseInt(tokens[4], value)) {
-        throw std::runtime_error("Invalid Price value.");
+        throw runtime_error("Invalid Price value.");
     }
     chip.price = value;
 
@@ -220,8 +222,8 @@ Chip chipFromTokens(const std::vector<std::string>& tokens) {
     return chip;
 }
 
-std::string toCsvRow(const Chip& chip) {
-    std::ostringstream oss;
+string toCsvRow(const Chip& chip) {
+    ostringstream oss;
     oss << chip.productId << ','
         << chip.productName << ','
         << chip.quantity << ','
@@ -232,20 +234,20 @@ std::string toCsvRow(const Chip& chip) {
     return oss.str();
 }
 
-void loadChips(std::vector<Chip>& chips) {
+void loadChips(vector<Chip>& chips) {
     chips.clear();
-    std::ifstream input(kDataFile);
+    ifstream input(kDataFile);
     if (!input.is_open()) {
-        std::ofstream createFile(kDataFile);
+        ofstream createFile(kDataFile);
         if (!createFile.is_open()) {
-            throw std::runtime_error("Unable to create data file.");
+            throw runtime_error("Unable to create data file.");
         }
         return;
     }
 
-    std::string line;
-    std::size_t lineNumber = 0;
-    while (std::getline(input, line)) {
+    string line;
+    size_t lineNumber = 0;
+    while (getline(input, line)) {
         ++lineNumber;
         if (line.empty()) {
             continue;
@@ -254,17 +256,17 @@ void loadChips(std::vector<Chip>& chips) {
         try {
             const auto tokens = tokenize(line);
             chips.emplace_back(chipFromTokens(tokens));
-        } catch (const std::exception& ex) {
-            std::cerr << "Skipping malformed line " << lineNumber << ": "
+        } catch (const exception& ex) {
+            cerr << "Skipping malformed line " << lineNumber << ": "
                       << ex.what() << '\n';
         }
     }
 }
 
-void saveChips(const std::vector<Chip>& chips) {
-    std::ofstream output(kDataFile, std::ios::trunc);
+void saveChips(const vector<Chip>& chips) {
+    ofstream output(kDataFile, ios::trunc);
     if (!output.is_open()) {
-        throw std::runtime_error("Failed to open data file for writing.");
+        throw runtime_error("Failed to open data file for writing.");
     }
 
     for (const auto& chip : chips) {
@@ -272,11 +274,11 @@ void saveChips(const std::vector<Chip>& chips) {
     }
 }
 
-void showAll(const std::vector<Chip>& chips) {
+void showAll(const vector<Chip>& chips) {
     if (chips.empty()) {
-        std::cout << repeatPattern("--", kTitleRepeat * 2 + 1) << '\n';
-        std::cout << "## Inventory is empty. Use the ADD option to register products.\n";
-        std::cout << repeatPattern("--", kTitleRepeat * 2 + 1) << '\n';
+        cout << repeatPattern("--", kTitleRepeat * 2 + 1) << '\n';
+        cout << "## Inventory is empty. Use the ADD option to register products.\n";
+        cout << repeatPattern("--", kTitleRepeat * 2 + 1) << '\n';
         return;
     }
 
@@ -285,12 +287,12 @@ void showAll(const std::vector<Chip>& chips) {
     for (const auto& chip : chips) {
         printChipTableRow(chip);
     }
-    std::cout << repeatPattern("--", kBorderRepeat) << '\n';
+    cout << repeatPattern("--", kBorderRepeat) << '\n';
     printChipTableFooter(chips.size());
 }
 
-Chip* findChip(std::vector<Chip>& chips, int productId) {
-    auto it = std::find_if(chips.begin(), chips.end(),
+Chip* findChip(vector<Chip>& chips, int productId) {
+    auto it = find_if(chips.begin(), chips.end(),
                            [productId](const Chip& chip) {
                                return chip.productId == productId;
                            });
@@ -300,7 +302,7 @@ Chip* findChip(std::vector<Chip>& chips, int productId) {
     return &(*it);
 }
 
-void addChip(std::vector<Chip>& chips) {
+void addChip(vector<Chip>& chips) {
     printSectionTitle("ADD NEW PRODUCT");
     Chip chip;
 
@@ -309,7 +311,7 @@ void addChip(std::vector<Chip>& chips) {
         if (!findChip(chips, chip.productId)) {
             break;
         }
-        std::cout << "Product ID already exists. Please enter a unique ID.\n";
+        cout << "Product ID already exists. Please enter a unique ID.\n";
     }
 
     chip.productName = promptString("Enter Product Name: ");
@@ -321,13 +323,13 @@ void addChip(std::vector<Chip>& chips) {
 
     chips.emplace_back(chip);
     saveChips(chips);
-    std::cout << "\n## RECORD ADDED SUCCESSFULLY!\n\n";
+    cout << "\n## RECORD ADDED SUCCESSFULLY!\n\n";
 }
 
-void searchChip(std::vector<Chip>& chips) {
+void searchChip(vector<Chip>& chips) {
     printSectionTitle("SEARCH PRODUCT FORM");
     if (chips.empty()) {
-        std::cout << "Inventory is empty. Add products before searching.\n";
+        cout << "Inventory is empty. Add products before searching.\n";
         return;
     }
 
@@ -335,19 +337,19 @@ void searchChip(std::vector<Chip>& chips) {
     Chip* chip = findChip(chips, id);
 
     if (!chip) {
-        std::cout << "## SORRY! NO MATCHING DETAILS AVAILABLE ##\n\n";
+        cout << "## SORRY! NO MATCHING DETAILS AVAILABLE ##\n\n";
         return;
     }
 
     printChipTableHeader();
     printChipTableRow(*chip);
-    std::cout << repeatPattern("--", kBorderRepeat) << '\n';
+    cout << repeatPattern("--", kBorderRepeat) << '\n';
 }
 
-void editChip(std::vector<Chip>& chips) {
+void editChip(vector<Chip>& chips) {
     printSectionTitle("EDIT PRODUCT DETAILS");
     if (chips.empty()) {
-        std::cout << "Inventory is empty. Add products before editing.\n";
+        cout << "Inventory is empty. Add products before editing.\n";
         return;
     }
 
@@ -355,86 +357,86 @@ void editChip(std::vector<Chip>& chips) {
     Chip* chip = findChip(chips, id);
 
     if (!chip) {
-        std::cout << "## SORRY! NO MATCHING DETAILS AVAILABLE ##\n\n";
+        cout << "## SORRY! NO MATCHING DETAILS AVAILABLE ##\n\n";
         return;
     }
 
     printChipTableHeader();
     printChipTableRow(*chip);
-    std::cout << repeatPattern("--", kBorderRepeat) << '\n';
+    cout << repeatPattern("--", kBorderRepeat) << '\n';
 
     if (!promptYesNo("Proceed to update this product? (y/n): ")) {
-        std::cout << "Update cancelled.\n";
+        cout << "Update cancelled.\n";
         return;
     }
 
-    std::cout << "Leave a field blank to keep the current value.\n";
+    cout << "Leave a field blank to keep the current value.\n";
     chip->productName = promptOptionalString(
         "Product Name [" + chip->productName + "]: ", chip->productName);
     chip->quantity = promptOptionalInt(
-        "Quantity [" + std::to_string(chip->quantity) + "]: ", chip->quantity);
+        "Quantity [" + to_string(chip->quantity) + "]: ", chip->quantity);
     chip->sellerName = promptOptionalString(
         "Seller Name [" + chip->sellerName + "]: ", chip->sellerName);
     chip->price = promptOptionalInt(
-        "Price [" + std::to_string(chip->price) + "]: ", chip->price);
+        "Price [" + to_string(chip->price) + "]: ", chip->price);
     chip->brandName = promptOptionalString(
         "Brand Name [" + chip->brandName + "]: ", chip->brandName);
     chip->deadstock = promptOptionalInt(
-        "Deadstock [" + std::to_string(chip->deadstock) + "]: ",
+        "Deadstock [" + to_string(chip->deadstock) + "]: ",
         chip->deadstock);
 
     saveChips(chips);
-    std::cout << "\n## RECORD UPDATED ##\n\n";
+    cout << "\n## RECORD UPDATED ##\n\n";
 }
 
-void deleteChip(std::vector<Chip>& chips) {
+void deleteChip(vector<Chip>& chips) {
     printSectionTitle("DELETE PRODUCT DETAILS");
     if (chips.empty()) {
-        std::cout << "Inventory is empty. Add products before deleting.\n";
+        cout << "Inventory is empty. Add products before deleting.\n";
         return;
     }
 
     int id = promptInt("Enter Product ID to delete: ");
     Chip* chip = findChip(chips, id);
     if (!chip) {
-        std::cout << "## SORRY! NO MATCHING DETAILS AVAILABLE ##\n\n";
+        cout << "## SORRY! NO MATCHING DETAILS AVAILABLE ##\n\n";
         return;
     }
 
     printChipTableHeader();
     printChipTableRow(*chip);
-    std::cout << repeatPattern("--", kBorderRepeat) << '\n';
+    cout << repeatPattern("--", kBorderRepeat) << '\n';
 
     if (!promptYesNo("Are you sure you want to delete this product? (y/n): ")) {
-        std::cout << "Deletion cancelled.\n";
+        cout << "Deletion cancelled.\n";
         return;
     }
 
-    auto it = std::remove_if(chips.begin(), chips.end(),
+    auto it = remove_if(chips.begin(), chips.end(),
                              [id](const Chip& candidate) {
                                  return candidate.productId == id;
                              });
     chips.erase(it, chips.end());
     saveChips(chips);
-    std::cout << "\n## RECORD DELETED ##\n\n";
+    cout << "\n## RECORD DELETED ##\n\n";
 }
 
-void generateBill(std::vector<Chip>& chips) {
+void generateBill(vector<Chip>& chips) {
     printSectionTitle("BILL SLIP");
     if (chips.empty()) {
-        std::cout << "Inventory is empty. Add products before billing.\n";
+        cout << "Inventory is empty. Add products before billing.\n";
         return;
     }
 
     int id = promptInt("\nEnter Product ID to bill: ");
     Chip* chip = findChip(chips, id);
     if (!chip) {
-        std::cout << "## SORRY! NO MATCHING DETAILS AVAILABLE ##\n\n";
+        cout << "## SORRY! NO MATCHING DETAILS AVAILABLE ##\n\n";
         return;
     }
 
     if (chip->quantity == 0) {
-        std::cout << "Product is out of stock.\n";
+        cout << "Product is out of stock.\n";
         return;
     }
 
@@ -442,9 +444,9 @@ void generateBill(std::vector<Chip>& chips) {
     while (true) {
         purchaseQty = promptInt("Enter quantity to purchase: ");
         if (purchaseQty <= 0) {
-            std::cout << "Quantity must be greater than zero.\n";
+            cout << "Quantity must be greater than zero.\n";
         } else if (purchaseQty > chip->quantity) {
-            std::cout << "Insufficient stock. Available quantity: "
+            cout << "Insufficient stock. Available quantity: "
                       << chip->quantity << ".\n";
         } else {
             break;
@@ -472,71 +474,71 @@ void generateBill(std::vector<Chip>& chips) {
 
     const auto border = repeatPattern("--", 30);
     const auto starBorder = repeatPattern("*", 70);
-    std::cout << '\n' << border << " BILL DETAILS " << border << "\n\n";
-    std::cout << starBorder << '\n';
-    std::cout << "PRODUCT ID   : " << chip->productId
-              << std::setw(18) << " "
+    cout << '\n' << border << " BILL DETAILS " << border << "\n\n";
+    cout << starBorder << '\n';
+    cout << "PRODUCT ID   : " << chip->productId
+              << setw(18) << " "
               << "PRODUCT NAME : " << chip->productName << '\n';
-    std::cout << "SELLER NAME  : " << chip->sellerName << '\n';
-    std::cout << "BRAND NAME   : " << chip->brandName << '\n';
-    std::cout << starBorder << '\n';
+    cout << "SELLER NAME  : " << chip->sellerName << '\n';
+    cout << "BRAND NAME   : " << chip->brandName << '\n';
+    cout << starBorder << '\n';
 
-    std::cout << std::fixed << std::setprecision(2);
-    std::cout << "UNITS        : " << purchaseQty << '\n';
-    std::cout << "UNIT PRICE   : Rs. " << unitPrice << '\n';
-    std::cout << "SUBTOTAL     : Rs. " << subtotal << '\n';
-    std::cout << "GST @ " << static_cast<int>(kDefaultGstRate * 100)
+    cout << fixed << setprecision(2);
+    cout << "UNITS        : " << purchaseQty << '\n';
+    cout << "UNIT PRICE   : Rs. " << unitPrice << '\n';
+    cout << "SUBTOTAL     : Rs. " << subtotal << '\n';
+    cout << "GST @ " << static_cast<int>(kDefaultGstRate * 100)
               << "%    : Rs. " << gstAmount << '\n';
-    std::cout << "MRP (incl. GST): Rs. " << totalMrp << '\n';
-    std::cout << "DISCOUNT @" << discountRate * 100
+    cout << "MRP (incl. GST): Rs. " << totalMrp << '\n';
+    cout << "DISCOUNT @" << discountRate * 100
               << "% : Rs. -" << discountAmount << '\n';
-    std::cout << repeatPattern("-=", 36) << '\n';
-    std::cout << "NET AMOUNT   : Rs. " << netAmount << '\n';
-    std::cout << "YOU SAVED    : Rs. " << savings << '\n';
-    std::cout << std::defaultfloat << std::setprecision(6);
-    std::cout << '\n' << starBorder << '\n';
-    std::cout << std::setw(25) << " " << "THANK YOU FOR YOUR VISIT!\n";
-    std::cout << starBorder << "\n\n";
+    cout << repeatPattern("-=", 36) << '\n';
+    cout << "NET AMOUNT   : Rs. " << netAmount << '\n';
+    cout << "YOU SAVED    : Rs. " << savings << '\n';
+    cout << defaultfloat << setprecision(6);
+    cout << '\n' << starBorder << '\n';
+    cout << setw(25) << " " << "THANK YOU FOR YOUR VISIT!\n";
+    cout << starBorder << "\n\n";
 
     chip->quantity -= purchaseQty;
     saveChips(chips);
-    std::cout << "Inventory updated.\n";
+    cout << "Inventory updated.\n";
 }
 
 void menuLoop() {
-    std::vector<Chip> chips;
+    vector<Chip> chips;
     try {
         loadChips(chips);
-    } catch (const std::exception& ex) {
-        std::cerr << "Failed to initialize data: " << ex.what() << '\n';
+    } catch (const exception& ex) {
+        cerr << "Failed to initialize data: " << ex.what() << '\n';
         return;
     }
 
     while (true) {
         const auto menuBorder = repeatPattern("=", 58);
-        std::cout << '\n' << menuBorder << '\n';
-        std::cout << std::setw(10) << " " << "CHIP INVENTORY MANAGEMENT MENU\n";
-        std::cout << menuBorder << '\n';
-        std::cout << "1. SHOW PRODUCT DETAILS\n";
-        std::cout << "2. ADD NEW PRODUCT\n";
-        std::cout << "3. SEARCH PRODUCT\n";
-        std::cout << "4. EDIT PRODUCT DETAILS\n";
-        std::cout << "5. DELETE PRODUCT\n";
-        std::cout << "6. GENERATE BILL\n";
-        std::cout << "7. CONTACT SUPPORT\n";
-        std::cout << "0. EXIT\n";
-        std::cout << menuBorder << '\n';
-        std::cout << "Enter your choice: ";
+        cout << '\n' << menuBorder << '\n';
+        cout << setw(10) << " " << "CHIP INVENTORY MANAGEMENT MENU\n";
+        cout << menuBorder << '\n';
+        cout << "1. SHOW PRODUCT DETAILS\n";
+        cout << "2. ADD NEW PRODUCT\n";
+        cout << "3. SEARCH PRODUCT\n";
+        cout << "4. EDIT PRODUCT DETAILS\n";
+        cout << "5. DELETE PRODUCT\n";
+        cout << "6. GENERATE BILL\n";
+        cout << "7. CONTACT SUPPORT\n";
+        cout << "0. EXIT\n";
+        cout << menuBorder << '\n';
+        cout << "Enter your choice: ";
 
-        std::string choiceLine;
-        if (!std::getline(std::cin, choiceLine)) {
-            std::cout << "\nInput terminated. Exiting...\n";
+        string choiceLine;
+        if (!getline(cin, choiceLine)) {
+            cout << "\nInput terminated. Exiting...\n";
             break;
         }
 
         int choice{};
         if (!parseInt(choiceLine, choice)) {
-            std::cout << "Invalid option. Please enter a number between 0 and 7.\n";
+            cout << "Invalid option. Please enter a number between 0 and 7.\n";
             continue;
         }
 
@@ -564,18 +566,18 @@ void menuLoop() {
                     contactInfo();
                     break;
                 case 0:
-                    std::cout << "\nGOODBYE!!\n";
+                    cout << "\nGOODBYE!!\n";
                     break;
                 default:
-                    std::cout << "Invalid option. Please choose between 0 and 7.\n";
+                    cout << "Invalid option. Please choose between 0 and 7.\n";
                     continue;
             }
 
             if (choice == 0) {
                 return;
             }
-        } catch (const std::exception& ex) {
-            std::cerr << "Error: " << ex.what() << '\n';
+        } catch (const exception& ex) {
+            cerr << "Error: " << ex.what() << '\n';
         }
     }
 }
@@ -583,12 +585,12 @@ void menuLoop() {
 void contactInfo() {
     printSectionTitle("CONTACT US");
     const auto border = repeatPattern("*", 60);
-    std::cout << border << '\n';
-    std::cout << std::setw(15) << " " << "Support Desk : Silicon Supply Co.\n";
-    std::cout << std::setw(15) << " " << "Email        : support@siliconsupply.com\n";
-    std::cout << std::setw(15) << " " << "Phone        : +1-800-555-CHIP\n";
-    std::cout << std::setw(15) << " " << "Hours        : Mon-Sat 9:00-18:00\n";
-    std::cout << border << "\n\n";
+    cout << border << '\n';
+    cout << setw(15) << " " << "Support Desk : OOPS Supply Co.\n";
+    cout << setw(15) << " " << "Email        : oops.group8@bpit.com\n";
+    cout << setw(15) << " " << "Phone        : 1234567890\n";
+    cout << setw(15) << " " << "Hours        : Mon-Sat 9:00-18:00\n";
+    cout << border << "\n\n";
 }
 
 }  // namespace
@@ -596,8 +598,8 @@ void contactInfo() {
 int main() {
     try {
         menuLoop();
-    } catch (const std::exception& ex) {
-        std::cerr << "Fatal error: " << ex.what() << '\n';
+    } catch (const exception& ex) {
+        cerr << "Fatal error: " << ex.what() << '\n';
         return 1;
     }
     return 0;
