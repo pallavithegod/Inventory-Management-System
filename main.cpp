@@ -288,7 +288,7 @@ void generateBill(vector<Chip>& v) {
 void menuLoop() {
     vector<Chip> v;
     try { loadChips(v); }
-    catch (const exception& e) { cerr << "Init error: " << e.what() << '\n'; return; }
+    catch (...) { cerr << "Init error.\n"; return; }
 
     while (true) {
         const auto border = string(58, '=');
@@ -317,6 +317,6 @@ void menuLoop() {
 
 int main() {
     try { menuLoop(); }
-    catch (const exception& e) { cerr << "Fatal error: " << e.what() << '\n'; return 1; }
+    catch (...) { cerr << "Fatal error.\n"; return 1; }
     return 0;
 }
