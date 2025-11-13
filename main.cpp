@@ -258,6 +258,8 @@ void generateBill(vector<Chip>& v) {
     if (!c) { cout << "## NO MATCH FOUND ##\n\n"; return; }
     if (c->quantity == 0) { cout << "Out of stock.\n"; return; }
 
+     string customerName = promptString("Enter Customer Name: ");
+
     int qty = 0;
     while (true) {
         qty = promptInt("Enter quantity to purchase: ");
@@ -266,12 +268,20 @@ void generateBill(vector<Chip>& v) {
         else break;
     }
 
+    time_t t = time(nullptr);
+    tm* now = localtime(&t);
+    char buf[32];
+    strftime(buf, sizeof(buf), "%Y-%m-%d", now);
+    string dateStr(buf);
+
     double unit = c->price, subtotal = unit * qty, gst = subtotal * kDefaultGstRate;
     double mrp = subtotal + gst, disc = (mrp <= 1000) ? 0.05 : (unit < 3000 ? 0.08 : 0.12);
     double net = mrp * (1 - disc), save = mrp * disc;
 
     cout << fixed << setprecision(2);
     cout << "\n================================ BILL DETAILS ================================\n";
+    cout << "Date           : " << dateStr << '\n';                                   // CHANGE
+    cout << "Customer Name  : " << customerName << '\n';   
     cout << "PRODUCT ID   : " << c->productId << "   PRODUCT NAME : " << c->productName << '\n'
          << "SELLER NAME  : " << c->sellerName << "\nBRAND NAME   : " << c->brandName << '\n';
     cout << "UNITS        : " << qty << "\nUNIT PRICE   : Rs. " << unit
